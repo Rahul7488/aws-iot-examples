@@ -53,6 +53,7 @@ or in the "license" file accompanying this file. This file is distributed on an 
     this.endpoint = null;
     this.accessKey = null;
     this.secretKey = null;
+    this.sessionToken=null;
     this.regionName = 'us-east-1';
     this.logs = new LogService();
     this.clients = new ClientControllerCache(scope, this.logs);
@@ -66,7 +67,8 @@ or in the "license" file accompanying this file. This file is distributed on an 
       endpoint: this.endpoint.toLowerCase(),
       accessKey: this.accessKey,
       secretKey: this.secretKey,
-      regionName: this.regionName
+      regionName: this.regionName,
+      sessionToken: this.sessionToken
     };
     var client = this.clients.getClient(options);
     if (!client.connected) {
@@ -226,6 +228,7 @@ or in the "license" file accompanying this file. This file is distributed on an 
     var region = this.options.regionName;
     var secretKey = this.options.secretKey;
     var accessKey = this.options.accessKey;
+    var sessionToken = this.options.sessionToken;
     var algorithm = 'AWS4-HMAC-SHA256';
     var method = 'GET';
     var canonicalUri = '/mqtt';
@@ -250,9 +253,9 @@ or in the "license" file accompanying this file. This file is distributed on an 
     console.log('------------------');
     console.log('signingKey ' + signingKey);
     var signature = SigV4Utils.sign(signingKey, stringToSign);
-
+    var encoddedSessionToken =sessionToken?  "&X-Amz-Security-Token=" + encodeURIComponent(sessionToken) :"";
     canonicalQuerystring += '&X-Amz-Signature=' + signature;
-    var requestUrl = 'wss://' + host + canonicalUri + '?' + canonicalQuerystring;
+    var requestUrl = 'wss://' + host + canonicalUri + '?' + canonicalQuerystring + encoddedSessionToken;
     return requestUrl;
   };
 
